@@ -1,4 +1,4 @@
-package bpfutil
+package libbpfgohelpers
 
 import (
 	"bytes"
@@ -25,10 +25,12 @@ func NewRingBuffer[T any](bpfModule *bpf.Module, mapName string) (*RingBuffer[T]
 
 func (rb *RingBuffer[T]) Listen(consumer func(elem T)) error {
 	defer rb.rb.Stop()
+    // TODO configure polling delay
 	rb.rb.Poll(100)
 
 	for data := range rb.receiveChannel {
 		var record T
+        // TODO fix endianness
 		if err := binary.Read(bytes.NewBuffer(data), binary.LittleEndian, &record); err != nil {
 			return err
 		}
